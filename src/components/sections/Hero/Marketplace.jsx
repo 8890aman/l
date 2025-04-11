@@ -465,7 +465,7 @@ const MarketPlace = ({ onSectionChange }) => {
       
       {/* Notification */}
       {showNotification && (
-        <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50 animate-bounce-subtle w-[90%] max-w-[320px]">
+        <div className="fixed top-6 left-1/2 transform -translate-x-1/2 z-50 animate-bounce-subtle w-[90%] max-w-[320px]">
           <div className="bg-[#3298cb] border-4 border-[#2a6fa8] rounded-lg shadow-lg overflow-hidden w-full font-pixel select-none" 
             style={{ 
               boxShadow: '0 0 0 2px #000, 0 0 0 4px #2a6fa8, 0 5px 15px rgba(0,0,0,0.5)',
