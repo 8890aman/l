@@ -16,7 +16,6 @@ import PageTransition from "../../utils/PageTransition";
 // Add neumorphism style classes - keeping only the ones we actually use
 const raisedNeumorphicBox = "shadow-[5px_5px_15px_0px_rgba(0,0,0,0.1),-5px_-5px_15px_0px_rgba(255,255,255,0.8)] border-2 border-gray-50 transform transition-all duration-200 hover:shadow-[8px_8px_20px_0px_rgba(0,0,0,0.12),-8px_-8px_20px_0px_rgba(255,255,255,0.9)] hover:translate-y-[-2px]";
 const insetNeumorphicBox = "shadow-[inset_5px_5px_10px_0px_rgba(0,0,0,0.07),inset_-5px_-5px_10px_0px_rgba(255,255,255,0.5)] border-2 border-gray-100";
-const pressedNeumorphicBox = "shadow-[inset_5px_5px_10px_0px_rgba(0,0,0,0.15),inset_-5px_-5px_10px_0px_rgba(255,255,255,0.5)] border-2 border-black";
 const pokeBlueBackground = "bg-[#3298cb]"; // Add the same blue background as marketplace collection badge
 
 // Main Hero Component
