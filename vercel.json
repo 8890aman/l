@@ -1,0 +1,8 @@
+{
+  "routes": [
+    { "src": "/favicon.ico", "dest": "/favicon.ico" },
+    { "src": "/favicon.png", "dest": "/favicon.png" },
+    { "src": "/favicon.gif", "dest": "/favicon.gif" },
+    { "src": "/(.*)", "dest": "/index.html" }
+  ]
+} 
