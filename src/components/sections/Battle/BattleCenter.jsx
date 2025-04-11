@@ -88,7 +88,7 @@ const BattleCenter = () => {
           {/* Background will be replaced with an image */}
           <div className="absolute inset-0 bg-cover bg-center opacity-25"
                style={{ 
-                 backgroundImage: `url('/battle-arena-placeholder.png')`,
+                 backgroundImage: `url('https://i.pinimg.com/originals/7e/30/f6/7e30f6211a5f6964c45b1a7d222fff45.gif')`,
                  backgroundSize: 'cover',
                  backgroundPosition: 'center',
                  /* 
