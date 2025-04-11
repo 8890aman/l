@@ -1,6 +1,6 @@
+/* Import custom cursor styles */
+@import './styles/customCursor.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-/* Import custom cursor styles */
-@import './styles/customCursor.css';
