@@ -227,21 +227,6 @@ const MobilePokeBox = ({ onSectionChange }) => {
         
         // Show mini player if music should be playing
         setMiniPlayerVisible(true);
-        
-        // Ensure the audio is playing with the correct track
-        if (audioRef.current) {
-          setTimeout(() => {
-            if (audioRef.current && isPlaying) {
-              audioRef.current.src = musicTracks[selectedTrackIndex].src;
-              audioRef.current.volume = 0.5;
-              audioRef.current.play().catch(err => {
-                console.log("Auto-playback error:", err);
-                // Some browsers block autoplay, so update state to reflect this
-                setIsPlaying(false);
-              });
-            }
-          }, 100); // Short delay to ensure DOM is ready
-        }
       }
     }
   }, []);
