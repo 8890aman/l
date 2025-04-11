@@ -60,6 +60,16 @@ const Sidebar = ({ isCollapsed, toggleCollapse, onSectionChange }) => {
   });
   const [currentProgress, setCurrentProgress] = useState(0);
   const progressIntervalRef = useRef(null);
+  // Get collection from localStorage
+  const [userCreatures, setUserCreatures] = useState(() => {
+    try {
+      const savedCollection = localStorage.getItem('pokebox-collection');
+      return savedCollection ? JSON.parse(savedCollection) : [];
+    } catch (error) {
+      console.error("Error loading collection from localStorage:", error);
+      return [];
+    }
+  });
 
   // Audio refs
   const audioRef = useRef(null);
@@ -110,8 +120,8 @@ const Sidebar = ({ isCollapsed, toggleCollapse, onSectionChange }) => {
   useEffect(() => {
     const handleNotificationEvent = (event) => {
       if (event.detail && event.detail.message) {
-        // Only show notifications about receiving Pokémon
-        if (event.detail.message.includes("added to your collection")) {
+        // Only show notifications that are not related to collection changes
+        if (!event.detail.message.includes("collection")) {
           showNotificationMessage(event.detail.message);
         }
       }
@@ -141,8 +151,8 @@ const Sidebar = ({ isCollapsed, toggleCollapse, onSectionChange }) => {
     { id: "marketplace", label: "MARKETPLACE", icon: ShoppingBagIcon, description: "Buy and sell Pokémon", path: "/marketplace" },
   ];
 
-  // Define creatures data using all available images
-  const creatures = [
+  // Combine default creatures with user collection for display
+  const creatures = [...(userCreatures || []), ...[
     {
       id: 1,
       name: "EmberWing",
@@ -187,7 +197,10 @@ const Sidebar = ({ isCollapsed, toggleCollapse, onSectionChange }) => {
       weight: "??kg",
       desc: "A mysterious creature that seems to shift between different types. Its true form is unknown."
     },
-  ];
+  ]].filter((creature, index, self) => 
+    // Remove duplicates by ID 
+    index === self.findIndex((c) => c.id === creature.id)
+  );
 
   // Get current creature
   const currentCreature = creatures[creatureIndex];
@@ -565,6 +578,34 @@ const Sidebar = ({ isCollapsed, toggleCollapse, onSectionChange }) => {
         }
       }
     }
+  }, []);
+
+  // Update user creatures when collection changes in localStorage
+  useEffect(() => {
+    const handleStorageChange = () => {
+      try {
+        const savedCollection = localStorage.getItem('pokebox-collection');
+        if (savedCollection) {
+          setUserCreatures(JSON.parse(savedCollection));
+        }
+      } catch (error) {
+        console.error("Error updating collection from localStorage:", error);
+      }
+    };
+    
+    // Listen for storage events
+    window.addEventListener('storage', handleStorageChange);
+    
+    // Check for updates periodically (for cases where storage event might not fire)
+    const checkInterval = setInterval(handleStorageChange, 2000);
+    
+    // Initial load
+    handleStorageChange();
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      clearInterval(checkInterval);
+    };
   }, []);
 
   return (

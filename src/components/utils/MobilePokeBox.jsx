@@ -21,10 +21,10 @@ import notificationSound from "../../assets/music/notification.mp3";
 import pageSwitchSound from "../../assets/music/pageOrnavlinkswitch.mp3";
 
 // Import only the needed images
-import mysteryImg from "../../assets/pixel-art-question-mark-creature--teal-and-mint-gr.png";
 import charizardGif from "../../assets/mega_charizard_y_animated_sprite_by_noellembrooks_ddmd4dm.gif";
 import gyaradosGif from "../../assets/mega_gyarados_animated_v2__request__by_diegotoon20_d9dslj3.gif";
 import raichuGif from "../../assets/raichu.gif";
+import mysteryImg from "../../assets/pixel-art-question-mark-creature--teal-and-mint-gr.png";
 
 const MobilePokeBox = ({ onSectionChange }) => {
   // State management
@@ -56,6 +56,17 @@ const MobilePokeBox = ({ onSectionChange }) => {
   const audioRef = useRef(null);
   const soundEffectRef = useRef(null);
 
+  // Get collection from localStorage
+  const [userCreatures, setUserCreatures] = useState(() => {
+    try {
+      const savedCollection = localStorage.getItem('pokebox-collection');
+      return savedCollection ? JSON.parse(savedCollection) : [];
+    } catch (error) {
+      console.error("Error loading collection from localStorage:", error);
+      return [];
+    }
+  });
+
   // Menu items
   const menuItems = [
     { id: "home", label: "HOME", icon: HomeIcon, description: "Return to the main dashboard", path: "/" },
@@ -67,7 +78,7 @@ const MobilePokeBox = ({ onSectionChange }) => {
   ];
 
   // Define creatures data
-  const creatures = [
+  const creatures = [...(userCreatures || []), ...[
     {
       id: 1,
       name: "EmberWing",
@@ -112,7 +123,10 @@ const MobilePokeBox = ({ onSectionChange }) => {
       weight: "??kg",
       desc: "A mysterious creature that seems to shift between different types. Its true form is unknown."
     },
-  ];
+  ]].filter((creature, index, self) => 
+    // Remove duplicates by ID 
+    index === self.findIndex((c) => c.id === creature.id)
+  );
 
   // Get current creature
   const currentCreature = creatures[creatureIndex];
@@ -282,6 +296,34 @@ const MobilePokeBox = ({ onSectionChange }) => {
 
     return () => {
       document.head.removeChild(style);
+    };
+  }, []);
+
+  // Update user creatures when collection changes in localStorage
+  useEffect(() => {
+    const handleStorageChange = () => {
+      try {
+        const savedCollection = localStorage.getItem('pokebox-collection');
+        if (savedCollection) {
+          setUserCreatures(JSON.parse(savedCollection));
+        }
+      } catch (error) {
+        console.error("Error updating collection from localStorage:", error);
+      }
+    };
+    
+    // Listen for storage events
+    window.addEventListener('storage', handleStorageChange);
+    
+    // Check for updates periodically (for cases where storage event might not fire)
+    const checkInterval = setInterval(handleStorageChange, 2000);
+    
+    // Initial load
+    handleStorageChange();
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      clearInterval(checkInterval);
     };
   }, []);
 

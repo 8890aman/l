@@ -26,7 +26,8 @@ import {
   CurrencyDollarIcon,
   StarIcon,
   ArrowsUpDownIcon,
-  UserIcon
+  UserIcon,
+  ArchiveBoxIcon
 } from "@heroicons/react/24/outline";
 import PageTransition from "../../utils/PageTransition";
 
@@ -71,11 +72,46 @@ const rarityColors = {
   "mythical": { text: "#E11D48", bg: "#FFF1F2" }
 };
 
-// Define event for communicating with Sidebar
-const NotificationEvent = new CustomEvent('pokedex-notification', {
-  bubbles: true,
-  detail: { message: '' }
-});
+// Add this function to update the user's collection in localStorage
+const addToCollection = (creature) => {
+  try {
+    // Get current collection from localStorage or initialize empty array
+    const currentCollection = JSON.parse(localStorage.getItem('pokebox-collection') || '[]');
+    
+    // Create new creature entry for collection based on marketplace creature
+    const collectionEntry = {
+      id: creature.id,
+      name: creature.name,
+      image: creature.image,
+      number: String(creature.id).padStart(3, '0'),
+      type: `${creature.type.toUpperCase()}${creature.secondaryType ? `/${creature.secondaryType.toUpperCase()}` : ''}`,
+      stats: { 
+        hp: 60 + Math.floor(creature.level * 0.8), 
+        atk: 50 + Math.floor(creature.level * 1.1),
+        def: 45 + Math.floor(creature.level * 0.6),
+        spd: 40 + Math.floor(creature.level * 1.2)
+      },
+      height: `${(1 + Math.random() * 2).toFixed(1)}m`,
+      weight: `${(10 + Math.random() * 90).toFixed(1)}kg`,
+      desc: creature.description.substring(0, 120)
+    };
+    
+    // Check if creature already exists in collection by ID
+    const existingIndex = currentCollection.findIndex(item => item.id === creature.id);
+    
+    // If it doesn't exist, add it to collection
+    if (existingIndex === -1) {
+      currentCollection.push(collectionEntry);
+      localStorage.setItem('pokebox-collection', JSON.stringify(currentCollection));
+      return true;
+    }
+    
+    return false;
+  } catch (error) {
+    console.error("Error adding to collection:", error);
+    return false;
+  }
+};
 
 const MarketPlace = ({ onSectionChange }) => {
   const [sortBy, setSortBy] = useState("price-asc");
@@ -408,6 +444,33 @@ const MarketPlace = ({ onSectionChange }) => {
     setSelectedItem(null);
   };
 
+  // Add state to track user's collection
+  const [userCollection, setUserCollection] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('pokebox-collection') || '[]').map(item => item.id);
+    } catch (error) {
+      console.error("Error loading collection:", error);
+      return [];
+    }
+  });
+
+  // Add effect to update collection when localStorage changes
+  useEffect(() => {
+    const handleStorageChange = () => {
+      try {
+        const collection = JSON.parse(localStorage.getItem('pokebox-collection') || '[]');
+        setUserCollection(collection.map(item => item.id));
+      } catch (error) {
+        console.error("Error updating collection from localStorage:", error);
+      }
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, []);
+
   // Handle purchase confirmation
   const handleConfirmPurchase = () => {
     // Show transfer progress
@@ -429,16 +492,26 @@ const MarketPlace = ({ onSectionChange }) => {
           
           // Set notification message based on purchased creature
           if (selectedItem) {
-            // Local notification
-            setNotificationMessage(`${selectedItem.name} successfully added to your collection!`);
+            // Add the purchased creature to the collection
+            const isNewAddition = addToCollection(selectedItem);
+            
+            // Set message based on whether it was added or already exists
+            const message = isNewAddition
+              ? `${selectedItem.name} successfully added to your collection!`
+              : `${selectedItem.name} is already in your collection!`;
+            
+            // Local notification only - no more sidebar notification
+            setNotificationMessage(message);
             setShowNotification(true);
             
-            // Also send notification to Pokédex
-            const event = new CustomEvent('pokedex-notification', {
-              bubbles: true,
-              detail: { message: `${selectedItem.name} successfully added to your collection!` }
-            });
-            document.dispatchEvent(event);
+            // Update local collection state
+            if (isNewAddition && !userCollection.includes(selectedItem.id)) {
+              setUserCollection(prev => [...prev, selectedItem.id]);
+            }
+            
+            // Trigger a storage event so other components know collection changed
+            // This will help update the sidebar immediately without notification
+            window.dispatchEvent(new Event('storage'));
             
             // Auto-dismiss notification after 5 seconds
             setTimeout(() => {
@@ -450,6 +523,132 @@ const MarketPlace = ({ onSectionChange }) => {
         }, 500);
       }
     }, 200); // Update every 200ms for a total of about 2 seconds
+  };
+
+  // Updated card render function to show collection badge for owned creatures
+  const renderCard = (item) => {
+    const owned = userCollection.includes(item.id);
+    
+    return (
+      <Card 
+        key={item.id}
+        className="border rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 h-full flex flex-col"
+      >
+        <div className="relative">
+          {/* Image container with creature image */}
+          <div 
+            className="h-48 flex items-center justify-center p-4 border-b"
+            style={{ 
+              background: `linear-gradient(135deg, ${typeColors[item.type].bg} 0%, white 100%)`,
+              position: 'relative',
+              overflow: 'hidden'
+            }}
+          >
+            {/* Collection badge - displays if creature is in collection */}
+            {owned && (
+              <div className="absolute top-2 left-2 z-10 bg-[#3298cb] text-white p-1 rounded-full border-2 border-white shadow-md">
+                <ArchiveBoxIcon className="h-5 w-5" />
+              </div>
+            )}
+            
+            {/* Type Badge */}
+            <div 
+              className="absolute top-2 right-2 px-2 py-1 rounded-lg text-xs font-semibold z-10"
+              style={{ 
+                backgroundColor: typeColors[item.type].bg,
+                color: typeColors[item.type].text,
+                borderColor: typeColors[item.type].border,
+                borderWidth: 1
+              }}
+            >
+              {item.type.toUpperCase()}
+            </div>
+            
+            {/* Secondary Type Badge (if any) */}
+            {item.secondaryType && (
+              <div 
+                className="absolute top-9 right-2 px-2 py-1 rounded-lg text-xs font-semibold z-10"
+                style={{ 
+                  backgroundColor: typeColors[item.secondaryType].bg,
+                  color: typeColors[item.secondaryType].text,
+                  borderColor: typeColors[item.secondaryType].border,
+                  borderWidth: 1
+                }}
+              >
+                {item.secondaryType.toUpperCase()}
+              </div>
+            )}
+            
+            {/* Rarity Badge */}
+            <div 
+              className="absolute bottom-2 left-2 px-2 py-1 rounded-lg text-xs font-semibold z-10 flex items-center"
+              style={{ 
+                backgroundColor: rarityColors[item.rarity].bg,
+                color: rarityColors[item.rarity].text,
+              }}
+            >
+              <StarIcon className="h-3 w-3 mr-1" />
+              {item.rarity.toUpperCase()}
+            </div>
+            
+            {/* Level Badge */}
+            <div 
+              className="absolute bottom-2 right-2 px-2 py-1 rounded-lg text-xs font-semibold bg-gray-100 text-gray-700 border border-gray-300 z-10"
+            >
+              LVL {item.level}
+            </div>
+            
+            <img
+              src={item.image}
+              alt={item.name}
+              className="max-h-36 max-w-36 object-contain z-0 transition-transform duration-300 hover:scale-110"
+            />
+          </div>
+        </div>
+
+        <CardBody className="p-4 flex-1 flex flex-col">
+          <div className="flex justify-between items-start mb-2">
+            <Typography variant="h5" className="font-pixel text-lg text-gray-800">
+              {item.name}
+            </Typography>
+            <Typography className="text-right font-semibold text-[#3298cb]">
+              ${item.price}
+            </Typography>
+          </div>
+          
+          <Typography className="text-sm text-gray-600 mb-3 line-clamp-3 flex-grow">
+            {item.description}
+          </Typography>
+          
+          <div className="flex justify-between items-center mt-auto">
+            <Typography className="text-xs text-gray-500">
+              Seller: {item.seller}
+            </Typography>
+            
+            <Button
+              size="sm"
+              className={`rounded-lg px-3 py-1 font-pixel text-xs flex items-center gap-1 
+                ${owned 
+                  ? 'bg-[#85DDFF] text-[#1a4971] hover:bg-[#ADD8E6]' 
+                  : 'bg-[#3298cb] text-white hover:bg-[#2a6fa8]'}`}
+              onClick={() => handleBuyClick(item)}
+            >
+              {owned ? (
+                <>
+                  <ArchiveBoxIcon className="h-3 w-3" />
+                  Owned
+                </>
+              ) : (
+                <>
+                  <ShoppingBagIcon className="h-3 w-3" />
+                  Buy Now
+                </>
+              )}
+            </Button>
+          </div>
+        </CardBody>
+      </Card>
+    );
   };
 
   return (
@@ -695,77 +894,8 @@ const MarketPlace = ({ onSectionChange }) => {
                     
                     {currentItems.length > 0 ? (
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                        {currentItems.map((item) => (
-                          <Card key={item.id} className="overflow-hidden group transition-all duration-300 hover:scale-[1.02] bg-white backdrop-blur-md border-2 border-[#3298cb]/50 shadow-sm hover:shadow-md rounded-lg">
-                            <div className="relative">
-                              {/* Rarity and Type tags in single row */}
-                              <div className="absolute top-1.5 inset-x-1.5 z-10 flex justify-between">
-                                <div className="transform hover:scale-105 transition-transform duration-300">
-                                  <div className="bg-white/95 backdrop-blur-xl px-1.5 py-0.5 rounded-md font-pixel text-[9px] shadow-sm border capitalize"
-                                     style={{
-                                       borderColor: typeColors[item.type].border,
-                                       color: typeColors[item.type].text,
-                                       background: `linear-gradient(135deg, white, ${typeColors[item.type].bg})`
-                                     }}
-                                  >
-                                    {item.type}
-                                  </div>
-                                </div>
-                                
-                                <div className="transform hover:scale-105 transition-transform duration-300">
-                                  <div className="bg-white/95 backdrop-blur-xl px-1.5 py-0.5 rounded-md font-pixel text-[9px] shadow-sm border capitalize"
-                                     style={{
-                                       borderColor: rarityColors[item.rarity].text,
-                                       color: rarityColors[item.rarity].text,
-                                       background: `linear-gradient(135deg, white, ${rarityColors[item.rarity].bg})`
-                                     }}
-                                  >
-                                    {item.rarity}
-                                  </div>
-                                </div>
-                              </div>
-                              
-                              {/* Creature image container */}
-                              <div className="aspect-square p-1 flex items-center justify-center overflow-hidden relative transition-all duration-500"
-                                  style={{
-                                    background: `radial-gradient(circle at center, ${typeColors[item.type].bg}20, transparent)`
-                                  }}
-                              >
-                                <img 
-                                  src={item.image} 
-                                  alt={item.name}
-                                  className="h-24 w-24 object-contain transition-all duration-500 group-hover:scale-110 z-10 drop-shadow-lg"
-                                />
-                              </div>
-                            </div>
-                            <CardBody className="p-1.5 bg-gradient-to-br from-[#85DDFF]/10 to-[#3298cb]/10 backdrop-blur-xl border-t border-[#3298cb]/20">
-                              <div className="flex justify-between items-center">
-                                <div className="flex flex-col">
-                                  <Typography variant="h5" className="font-pixel text-gray-800 drop-shadow-sm text-[10px] bg-gradient-to-br from-[#2a6fa8] to-[#3298cb] bg-clip-text text-transparent">
-                                  {item.name}
-                                </Typography>
-                                  <div className="flex items-center">
-                                    <CurrencyDollarIcon className="w-2.5 h-2.5 mr-0.5 text-amber-600" />
-                                    <Typography className="font-pixel text-[9px] text-amber-600">
-                                      {item.price}
-                                    </Typography>
-                                    <Typography className="font-pixel text-[8px] text-gray-500 ml-1.5">
-                                  Lvl {item.level}
-                    </Typography>
-                  </div>
-                                </div>
-                  <Button 
-                                  className="px-1.5 py-0.5 flex items-center font-pixel bg-gradient-to-r from-blue-500 to-blue-700 text-white text-[9px] hover:from-blue-600 hover:to-blue-800 transition-all duration-300 shadow-sm rounded-md border border-white/20 hover:scale-105 transform"
-                                  onClick={() => handleBuyClick(item)}
-                                >
-                                  <ShoppingBagIcon className="h-2.5 w-2.5 mr-0.5" />
-                                  Buy
-                  </Button>
-                              </div>
-              </CardBody>
-            </Card>
-          ))}
-        </div>
+                        {currentItems.map(item => renderCard(item))}
+                      </div>
                     ) : (
                       <div className="bg-[#3298cb] rounded-lg p-2 text-center shadow-sm border border-[#2a6fa8]">
                         <Typography className="text-white font-pixel text-[10px]">
