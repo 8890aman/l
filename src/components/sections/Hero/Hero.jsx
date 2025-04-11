@@ -16,7 +16,7 @@ import PageTransition from "../../utils/PageTransition";
 // Add neumorphism style classes - keeping only the ones we actually use
 const raisedNeumorphicBox = "shadow-[5px_5px_15px_0px_rgba(0,0,0,0.1),-5px_-5px_15px_0px_rgba(255,255,255,0.8)] border-2 border-gray-50 transform transition-all duration-200 hover:shadow-[8px_8px_20px_0px_rgba(0,0,0,0.12),-8px_-8px_20px_0px_rgba(255,255,255,0.9)] hover:translate-y-[-2px]";
 const insetNeumorphicBox = "shadow-[inset_5px_5px_10px_0px_rgba(0,0,0,0.07),inset_-5px_-5px_10px_0px_rgba(255,255,255,0.5)] border-2 border-gray-100";
-const pokeBlueBackground = "bg-[#3298cb]"; // Add the same blue background as marketplace collection badge
+const pressedNeumorphicBox = "shadow-[inset_5px_5px_10px_0px_rgba(0,0,0,0.15),inset_-5px_-5px_10px_0px_rgba(255,255,255,0.5)] border-2 border-black";
 
 // Main Hero Component
 const Hero = () => {
@@ -161,16 +161,7 @@ const Hero = () => {
                     </div>
                   </div>
                   
-                  {/* Collection status indicator */}
-                  <div className="col-span-2 h-6 md:h-8 relative mb-2 md:mb-3 flex items-center justify-center">
-                    <div className={`${pokeBlueBackground} text-white px-2 py-0.5 rounded-md font-pixel text-xs shadow-md border-2 border-[#2a6fa8] flex items-center gap-1`}>
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
-                        <path d="M3.375 3C2.339 3 1.5 3.84 1.5 4.875v.75c0 1.036.84 1.875 1.875 1.875h17.25c1.035 0 1.875-.84 1.875-1.875v-.75C22.5 3.839 21.66 3 20.625 3H3.375Z" />
-                        <path fillRule="evenodd" d="m3.087 9 .54 9.176A3 3 0 0 0 6.62 21h10.757a3 3 0 0 0 2.995-2.824L20.913 9H3.087ZM12 10.5a.75.75 0 0 1 .75.75v4.94l1.72-1.72a.75.75 0 1 1 1.06 1.06l-3 3a.75.75 0 0 1-1.06 0l-3-3a.75.75 0 1 1 1.06-1.06l1.72 1.72v-4.94a.75.75 0 0 1 .75-.75Z" clipRule="evenodd" />
-                      </svg>
-                      COLLECTION SYNCHRONIZED
-                    </div>
-                  </div>
+                  {/* Footer bar that spans across both cards - mobile only */}
                   
                   {/* Charizard Card */}
                   <div className="relative h-auto min-h-[80px] md:min-h-[120px]">
@@ -273,7 +264,7 @@ const Hero = () => {
                   
                   <div className="relative z-10">
                     <Typography variant="h2" className="font-pixel text-xl md:text-3xl text-white mb-1 leading-tight drop-shadow-[0_2px_2px_rgba(0,0,0,0.3)]">
-                      <span className={`${pokeBlueBackground} px-2 md:px-3 py-0.5 md:py-1 rounded-lg inline-block transform -rotate-2 border-2 border-[#2a6fa8]`}>Catch 'em all</span>
+                      <span className="bg-[#3a66b0] px-2 md:px-3 py-0.5 md:py-1 rounded-lg inline-block transform -rotate-2">Catch 'em all</span>
                     </Typography>
                     <Typography variant="h2" className="font-pixel text-lg md:text-2xl text-[#3a66b0] mb-1 md:mb-2 leading-tight drop-shadow-[0_1px_1px_rgba(255,255,255,0.8)]">
                       with rare

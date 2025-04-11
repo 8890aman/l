@@ -895,7 +895,7 @@ const MarketPlace = ({ onSectionChange }) => {
                     {currentItems.length > 0 ? (
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                         {currentItems.map(item => renderCard(item))}
-                      </div>
+        </div>
                     ) : (
                       <div className="bg-[#3298cb] rounded-lg p-2 text-center shadow-sm border border-[#2a6fa8]">
                         <Typography className="text-white font-pixel text-[10px]">
