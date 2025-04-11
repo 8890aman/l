@@ -227,21 +227,6 @@ const MobilePokeBox = ({ onSectionChange }) => {
         
         // Show mini player if music should be playing
         setMiniPlayerVisible(true);
-        
-        // Ensure the audio is playing with the correct track
-        if (audioRef.current) {
-          setTimeout(() => {
-            if (audioRef.current && isPlaying) {
-              audioRef.current.src = musicTracks[selectedTrackIndex].src;
-              audioRef.current.volume = 0.5;
-              audioRef.current.play().catch(err => {
-                console.log("Auto-playback error:", err);
-                // Some browsers block autoplay, so update state to reflect this
-                setIsPlaying(false);
-              });
-            }
-          }, 100); // Short delay to ensure DOM is ready
-        }
       }
     }
   }, []);
@@ -313,19 +298,32 @@ const MobilePokeBox = ({ onSectionChange }) => {
             playSound(pageSwitchSound);
             setIsOpen(true);
           }}
-          className="fixed bottom-6 right-6 bg-gradient-to-br from-[#FF0000] to-[#CC0000] text-white w-16 h-16 rounded-full shadow-[0_5px_15px_rgba(204,0,0,0.5)] border-4 border-white z-50 flex items-center justify-center hover:scale-110 transition-all duration-200 float-animation"
+          className="fixed bottom-6 right-6 bg-gradient-to-br from-[#FF0000] to-[#CC0000] text-white flex items-center rounded-full shadow-[0_5px_15px_rgba(204,0,0,0.5)] pr-3 hover:scale-105 transition-all duration-200 z-50"
         >
-          <div className="w-11 h-11 rounded-full bg-white border-2 border-[#333] relative">
-            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#85DDFF] to-[#3298cb] absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 border border-[#333] flex items-center justify-center shadow-inner">
-              <div className="w-4 h-4 rounded-full bg-white shadow-sm"></div>
+          <div className="w-14 h-14 relative flex items-center justify-center">
+            {/* Red top half */}
+            <div className="absolute inset-0 bg-gradient-to-br from-[#FF0000] to-[#CC0000] rounded-full border-4 border-white"></div>
+            
+            {/* Divider line */}
+            <div className="absolute top-1/2 left-0 right-0 h-2 bg-[#111] transform -translate-y-1/2 z-10"></div>
+            
+            {/* White bottom half */}
+            <div className="absolute top-1/2 left-0 right-0 bottom-0 bg-white rounded-b-full border-4 border-white"></div>
+            
+            {/* Center button */}
+            <div className="absolute w-6 h-6 rounded-full bg-white border-2 border-[#111] z-20 flex items-center justify-center shadow-md">
+              <div className="w-4 h-4 rounded-full bg-[#85DDFF]"></div>
             </div>
           </div>
+          
+          {/* Menu text */}
+          <span className="font-pixel text-white text-sm ml-1 drop-shadow-md">MENU</span>
         </button>
       )}
 
       {/* Mini Player */}
       {miniPlayerVisible && isPlaying && !isOpen && !showMusic && (
-        <div className="fixed bottom-24 right-6 z-50 w-[180px] bg-gradient-to-r from-[#2a6fa8] to-[#3298cb] rounded-lg shadow-lg border-2 border-[#85DDFF]/80 backdrop-blur-sm">
+        <div className="fixed bottom-24 right-6 z-50 w-[220px] bg-gradient-to-r from-[#2a6fa8] to-[#3298cb] rounded-lg shadow-lg border-2 border-[#85DDFF]/80 backdrop-blur-sm">
           <div className="flex items-center p-2 relative">
             <div className="w-7 h-7 rounded-full bg-[#1a4971] flex items-center justify-center mr-2 border border-[#85DDFF] shadow-inner">
               {isPlaying ? (
@@ -401,18 +399,7 @@ const MobilePokeBox = ({ onSectionChange }) => {
       {/* Mobile Pokédex UI - Full Screen */}
       {isOpen && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-gradient-to-b from-[#FF0000] to-[#CC0000] rounded-xl w-full max-w-xs h-[90vh] overflow-hidden border-4 border-white shadow-[0_10px_50px_rgba(0,0,0,0.5)] flex flex-col relative">
-            {/* Close button */}
-            <button 
-              onClick={() => {
-                playSound(pageSwitchSound);
-                setIsOpen(false);
-              }}
-              className="absolute top-3 right-3 z-50 bg-white rounded-full w-8 h-8 flex items-center justify-center border-2 border-[#CC0000] shadow-md hover:scale-105 active:scale-95 transition-all duration-100"
-            >
-              <XMarkIcon className="h-5 w-5 text-[#FF0000]" />
-            </button>
-            
+          <div className="bg-gradient-to-b from-[#FF0000] to-[#CC0000] rounded-xl w-full max-w-md h-[90vh] overflow-hidden border-4 border-white shadow-[0_10px_50px_rgba(0,0,0,0.5)] flex flex-col relative">
             {/* Top Section with Blue Light */}
             <div className="h-16 bg-gradient-to-r from-[#FF0000] to-[#CC0000] relative px-4 flex items-center shadow-md">
               <div className="w-8 h-8 rounded-full border-2 border-white bg-[#85DDFF] relative overflow-hidden shadow-md">
@@ -847,7 +834,7 @@ const MobilePokeBox = ({ onSectionChange }) => {
                         setMiniPlayerVisible(true);
                       }
                     }}
-                    className="bg-gradient-to-b from-[#333333] to-[#222222] text-white rounded-full w-11 h-11 flex items-center justify-center border-2 border-[#111111] shadow-md hover:shadow-lg active:shadow-inner active:from-[#222222] active:to-[#333333] transition-all duration-100"
+                    className="bg-gradient-to-b from-[#333333] to-[#222222] text-white px-4 py-2 rounded-md flex items-center justify-center border-2 border-[#111111] shadow-md hover:shadow-lg active:shadow-inner active:from-[#222222] active:to-[#333333] transition-all duration-100"
                   >
                     <Typography className="font-pixel text-[9px]">MENU</Typography>
                   </button>
@@ -857,7 +844,7 @@ const MobilePokeBox = ({ onSectionChange }) => {
                       playSound(pageSwitchSound);
                       setIsOpen(false);
                     }}
-                    className="bg-gradient-to-b from-[#333333] to-[#222222] text-white rounded-full w-11 h-11 flex items-center justify-center border-2 border-[#111111] shadow-md hover:shadow-lg active:shadow-inner active:from-[#222222] active:to-[#333333] transition-all duration-100"
+                    className="bg-gradient-to-b from-[#333333] to-[#222222] text-white px-4 py-2 rounded-md flex items-center justify-center border-2 border-[#111111] shadow-md hover:shadow-lg active:shadow-inner active:from-[#222222] active:to-[#333333] transition-all duration-100"
                   >
                     <Typography className="font-pixel text-[9px]">CLOSE</Typography>
                   </button>

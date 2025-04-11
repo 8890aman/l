@@ -4,7 +4,8 @@ import { Typography } from "@material-tailwind/react";
 const PageTransition = ({ 
   isActive, 
   onTransitionComplete, 
-  pageName = "PAGE", 
+  // eslint-disable-next-line no-unused-vars
+  pageName = "PAGE",
   excludeSidebar = true,
   duration = 1000 
 }) => {
@@ -71,7 +72,7 @@ const PageTransition = ({
         </div>
         
         <Typography className="font-pixel text-[#85DDFF] text-lg z-10 animate-pulse">
-          LOADING {pageName.toUpperCase()}
+          LOADING
         </Typography>
       </div>
       
